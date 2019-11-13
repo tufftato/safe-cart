@@ -1,0 +1,168 @@
+int horn = 7;
+int brakeBL = 8;
+int brakeBR = 9;
+int ledFL = 10;
+int ledFR = 11;
+int ledBL = 12;
+int ledBR = 13;
+int padFL = A1;
+int padFR = A2;
+int padBL = A3;
+int padBR = A4;
+int sensorThres = 50;
+
+void setup() {
+    pinMode(horn, OUTPUT);
+    pinMode(brakeBL, OUTPUT);
+    pinMode(brakeBR, OUTPUT);
+    pinMode(ledFL, OUTPUT);
+    pinMode(ledFR, OUTPUT);
+    pinMode(ledBL, OUTPUT);
+    pinMode(ledBR, OUTPUT);
+    pinMode(padFL, INPUT);
+    pinMode(padFR, INPUT);
+    pinMode(padBL, INPUT);
+    pinMode(padBR, INPUT);
+    Serial.begin(1200);
+}
+
+void blinkLeft() {
+      digitalWrite(ledFL, HIGH);
+      digitalWrite(ledBL, HIGH);
+      digitalWrite(brakeBL, LOW);
+      digitalWrite(brakeBR, LOW);
+      noTone(horn);
+      delay(500);
+      digitalWrite(ledFL, LOW);
+      digitalWrite(ledBL, LOW);
+      digitalWrite(brakeBL, LOW);
+      digitalWrite(brakeBR, LOW);
+      noTone(horn);
+      delay(500);
+}
+
+void blinkRight() {
+      digitalWrite(ledFR, HIGH);
+      digitalWrite(ledBR, HIGH);
+      digitalWrite(brakeBL, LOW);
+      digitalWrite(brakeBR, LOW);
+      noTone(horn);
+      delay(500);
+      digitalWrite(ledFR, LOW);
+      digitalWrite(ledBR, LOW);
+      digitalWrite(brakeBL, LOW);
+      digitalWrite(brakeBR, LOW);
+      noTone(horn);
+      delay(500);
+}
+      
+void brake() {
+      digitalWrite(brakeBL, HIGH);
+      digitalWrite(brakeBR, HIGH);
+      digitalWrite(ledFR, LOW);
+      digitalWrite(ledFL, LOW);
+      noTone(horn);
+}
+
+void horn2() {
+      tone(horn, 1000);
+      digitalWrite(ledFL, LOW);
+      digitalWrite(ledFR, LOW);
+      digitalWrite(ledBL, LOW);
+      digitalWrite(ledBR, LOW);
+      digitalWrite(brakeBL, LOW);
+      digitalWrite(brakeBR, LOW);
+}
+
+void rest() {
+      digitalWrite(ledFL, LOW);
+      digitalWrite(ledFR, LOW);
+      digitalWrite(ledBL, LOW);
+      digitalWrite(ledBR, LOW);
+      digitalWrite(brakeBL, LOW);
+      digitalWrite(brakeBR, LOW);
+      noTone(horn);
+    }
+
+void loop() {
+    int analogSensor1 = analogRead(padFL);
+    int analogSensor2 = analogRead(padFR);
+    int analogSensor3 = analogRead(padBL);
+    int analogSensor4 = analogRead(padBR);
+    int turningL = false;
+    int turningR = false;
+    int braking = false;
+    int allActive = false;
+    
+    if ((analogSensor1 < sensorThres) && (analogSensor2 < sensorThres) && (analogSensor3 < sensorThres) && (analogSensor4 < sensorThres)) {
+      allActive = true;
+    }
+    else {
+      allActive = false;
+    }
+   
+    if (allActive == true) {
+      horn2();
+      Serial.println("HORN");
+      Serial.print("FL: ");
+      Serial.println(analogSensor1);
+      Serial.print("BL: ");
+      Serial.println(analogSensor3);
+      Serial.print("FR: ");
+      Serial.println(analogSensor2);
+      Serial.print("BR: ");
+      Serial.println(analogSensor4);
+      Serial.println(" ");
+    }  
+   
+    else if ((analogSensor2 < sensorThres) && (analogSensor3 < sensorThres)) {
+      blinkRight();
+      turningR = true;
+      Serial.println("BLINK RIGHT");
+      Serial.print("FR: ");
+      Serial.println(analogSensor2);
+      Serial.print("BL: ");
+      Serial.println(analogSensor3);
+      Serial.println(" ");
+    }   
+    
+    else if ((analogSensor1 < sensorThres) && (analogSensor4 < sensorThres)) {
+      blinkLeft();
+      turningL = true;
+      Serial.println("BLINK LEFT");
+      Serial.print("FL: ");
+      Serial.println(analogSensor1);
+      Serial.print("BR: ");
+      Serial.println(analogSensor4);
+      Serial.println(" ");
+    } 
+    
+    else if (((analogSensor1 < sensorThres) && (analogSensor2 < sensorThres)) && ((turningL == false) && (turningR == false))){
+      brake();
+      braking = true;
+      Serial.println("BRAKE");
+      Serial.print("FL: ");
+      Serial.println(analogSensor1);
+      Serial.print("BL: ");
+      Serial.println(analogSensor3);
+      Serial.print("FR: ");
+      Serial.println(analogSensor2);
+      Serial.print("BR: ");
+      Serial.println(analogSensor4);
+      Serial.println(" ");
+    }   
+    
+    else {
+      rest();
+      Serial.println("REST");
+      Serial.print("FL: ");
+      Serial.println(analogSensor1);
+      Serial.print("BL: ");
+      Serial.println(analogSensor3);
+      Serial.print("FR: ");
+      Serial.println(analogSensor2);
+      Serial.print("BR: ");
+      Serial.println(analogSensor4);
+      Serial.println(" ");
+    }
+}
